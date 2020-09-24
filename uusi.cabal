@@ -2,7 +2,10 @@ cabal-version:       2.4
 name:                uusi
 version:             0.0.0.0
 synopsis:            A program removing all version constraints of dependencies in .cabal file
-description:         See README for more info
+description:
+    @uusi@ is a command-line program to remove all version constraints of dependencies in .cabal files.
+    It is used in distribution packaging because @--allow-newer@ is not present when calling @Setup.hs@
+    instead of cabal-install.
 homepage:            https://github.com/berberman/uusi
 bug-reports:         https://github.com/berberman/uusi/issues
 license:             MIT
