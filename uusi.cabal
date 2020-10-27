@@ -28,7 +28,7 @@ common common-options
                        process ^>= 1.6.9,
                        directory ^>= 1.3.6,
                        microlens ^>= 0.4.11,
-                       optparse-applicative ^>= 0.15.1,
+                       optparse-applicative ^>= 0.15.1 || ^>= 0.16,
                        colourista ^>= 0.1,
                        text ^>= 1.2.3
   
