@@ -11,22 +11,10 @@ import qualified Data.Text as T
 import Distribution.PackageDescription.Parsec (readGenericPackageDescription)
 import Distribution.PackageDescription.PrettyPrint (showGenericPackageDescription)
 import Distribution.Types.CondTree
-  ( CondTree,
-    mapTreeConstrs,
-    mapTreeData,
-  )
 import Distribution.Types.Dependency (Dependency (..))
 import Distribution.Types.ExeDependency (ExeDependency (..))
+import Distribution.Types.LegacyExeDependency (LegacyExeDependency (..))
 import Distribution.Types.Lens
-  ( BuildInfo,
-    ConfVar,
-    GenericPackageDescription,
-    HasBuildInfo (buildInfo, buildToolDepends, targetBuildDepends),
-    condBenchmarks,
-    condExecutables,
-    condLibrary,
-    condTestSuites,
-  )
 import Distribution.Types.VersionRange (anyVersion)
 import qualified Distribution.Verbosity as Verbosity
 import Lens.Micro
@@ -35,12 +23,12 @@ import System.Directory (getTemporaryDirectory, removeFile)
 import System.IO (hClose, hFlush, hPutStr, openTempFile)
 import System.Process (readCreateProcessWithExitCode, shell)
 
-data Options = Options
+newtype Options = Options
   { optPath :: FilePath
   }
 
 cmdOptions :: Parser Options
-cmdOptions = Options <$> strArgument (metavar "TARGET")
+cmdOptions = Options <$> strArgument (metavar "PATH" <> help "Path to .cabal file")
 
 runArgsParser :: IO Options
 runArgsParser =
@@ -72,7 +60,7 @@ uusiCabal originPath = do
 
   cabal <- readGenericPackageDescription Verbosity.normal originPath
   temp <- getTemporaryDirectory
-  (oldPath, oldHandle) <- openTempFile temp "arch-hs-uusi"
+  (oldPath, oldHandle) <- openTempFile temp "uusi"
 
   let old = showGenericPackageDescription cabal
       uusied = showGenericPackageDescription $ uusiGenericPackageDescription cabal
@@ -97,6 +85,9 @@ type Uusi a = a -> a
 uusiDependency :: Uusi Dependency
 uusiDependency (Dependency name _ lib) = Dependency name anyVersion lib
 
+uusiLegacyExeDependency :: Uusi LegacyExeDependency
+uusiLegacyExeDependency (LegacyExeDependency name _) = LegacyExeDependency name anyVersion
+
 uusiExeDependency :: Uusi ExeDependency
 uusiExeDependency (ExeDependency name component _) = ExeDependency name component anyVersion
 
@@ -105,12 +96,10 @@ uusiBuildInfo i =
   i
     & (targetBuildDepends %~ fmap uusiDependency)
     & (buildToolDepends %~ fmap uusiExeDependency)
+    & (buildTools %~ fmap uusiLegacyExeDependency)
 
 uusiCondTree :: (HasBuildInfo a) => Uusi (CondTree ConfVar [Dependency] a)
-uusiCondTree cond =
-  mapTreeData (\a -> a & buildInfo %~ uusiBuildInfo)
-    . mapTreeConstrs (fmap uusiDependency)
-    $ cond
+uusiCondTree = mapTreeData (buildInfo %~ uusiBuildInfo) . mapTreeConstrs (fmap uusiDependency)
 
 uusiGenericPackageDescription :: Uusi GenericPackageDescription
 uusiGenericPackageDescription cabal =
@@ -118,6 +107,7 @@ uusiGenericPackageDescription cabal =
     & (condExecutables %~ uusiTrees)
     & (condTestSuites %~ uusiTrees)
     & (condBenchmarks %~ uusiTrees)
+    & (condSubLibraries %~ uusiTrees)
     & (condLibrary . mapped %~ uusiCondTree)
   where
-    uusiTrees trees = trees & mapped . _2 %~ uusiCondTree
+    uusiTrees trees = trees <&> _2 %~ uusiCondTree
