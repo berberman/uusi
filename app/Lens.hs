@@ -14,5 +14,8 @@ mapped :: Functor f => ASetter (f a) (f b) a b
 mapped k = Identity . fmap (runIdentity . k)
 
 -- qwq
+
+infixl 1 |>
+
 (|>) :: a -> (a -> b) -> b
 (|>) = (&)
