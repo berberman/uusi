@@ -10,6 +10,8 @@ module Distribution.Uusi.Core
   )
 where
 
+import Data.List ((\\))
+import Data.Maybe (catMaybes)
 import qualified Data.Text as T
 import Distribution.Types.CondTree (CondTree, mapTreeConstrs, mapTreeData)
 import Distribution.Types.Dependency (Dependency)
@@ -57,12 +59,13 @@ uusiReplace' (Replace _ p targets) x
   | otherwise = []
 uusiReplace' _ _ = []
 
-uusiReplace :: HasVersionedPackage a => SomeUusi -> Op [a]
-uusiReplace actions t
-  | k <- [r | x <- t, a <- actions, r <- uusiReplace' a x],
-    not <| null k =
-    k
-  | otherwise = t
+uusiReplace :: (HasVersionedPackage a, Eq a) => SomeUusi -> Op [a]
+uusiReplace actions t =
+  let k = [(r', if success then Just x else Nothing) | x <- t, a <- actions, let r = uusiReplace' a x, let success = not $ null r, r' <- r]
+      kf = fst <$> k
+      ks = catMaybes $ snd <$> k
+   in -- TODO: this is ugly
+      kf <> (t \\ ks)
 
 uusiRemove :: HasVersionedPackage a => SomeUusi -> Op [a]
 uusiRemove actions t = let ps = [p | (Remove _ p) <- actions] in filter (\x -> and <| fmap (not . (<| (x ^. myPkgName))) ps) t
