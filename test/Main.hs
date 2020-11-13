@@ -29,16 +29,17 @@ tests =
     [ testRemoveAllConstraints,
       testOverwrite,
       testRemove,
-      testReplace
+      testReplace,
+      testReplaceAndRemove
     ]
 
 testRemoveAllConstraints :: Test
 testRemoveAllConstraints =
-  createTest "remove all version constraints" allToAnyVersion $ fmap (myVersionRange .~ anyVersion)
+  createTest "remove all version constraints" [allToAnyVersion] $ fmap (myVersionRange .~ anyVersion)
 
 testOverwrite :: Test
 testOverwrite =
-  createTest "overwrite" (overwriteByName name ver) $ fmap (\x -> x & myVersionRange %~ if x ^. myPkgName == name then const ver else id)
+  createTest "overwrite" [overwriteByName name ver] $ fmap (\x -> x & myVersionRange %~ if x ^. myPkgName == name then const ver else id)
   where
     name = "b"
     ver = versionRange "> 666"
@@ -46,7 +47,7 @@ testOverwrite =
 testRemove :: Test
 testRemove =
   let name = "d"
-   in createTest "remove" (removeByName name) $ filter (\x -> x ^. myPkgName /= name)
+   in createTest "remove" [removeByName name] $ filter (\x -> x ^. myPkgName /= name)
 
 testReplace :: Test
 testReplace =
@@ -54,15 +55,25 @@ testReplace =
       targets = zip ["apple", "banana"] (repeat $ versionRange "-any")
    in createTest
         "replace"
-        (replaceByName name targets)
+        [replaceByName name targets]
         (\k -> [r | x <- k, r <- if x ^. myPkgName == name then fmap (\(n, v) -> x & myPkgName .~ n & myVersionRange .~ v) targets else [x]])
 
-createTest :: String -> Uusi -> Op [Dependency] -> Test
-createTest label action f = label ~: expectedDeps ~=? afterDeps
+testReplaceAndRemove :: Test
+testReplaceAndRemove =
+  let name1 = "d"
+      name2 = "base"
+      targets = zip ["apple", "banana"] (repeat $ versionRange "-any")
+   in createTest
+        "replace and remove"
+        [removeByName name1, replaceByName name2 targets]
+        (\k -> [r | x <- k, r <- if x ^. myPkgName == name2 then fmap (\(n, v) -> x & myPkgName .~ n & myVersionRange .~ v) targets else [x], r ^. myPkgName /= name1])
+
+createTest :: String -> SomeUusi -> Op [Dependency] -> Test
+createTest label actions f = label ~: expectedDeps ~=? afterDeps
   where
     origin = parseCabalFile cabalFile
     originDeps = flattenDependencies origin
-    after = uusiGenericPackageDescription [action] origin
+    after = uusiGenericPackageDescription actions origin
     afterDeps = flattenDependencies after
     expectedDeps = f originDeps
 
