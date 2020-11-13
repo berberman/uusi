@@ -48,12 +48,12 @@ uusiRange actions = chain <| uusiRange' <$> actions
 uusiReplace' :: HasVersionedPackage a => Uusi -> a -> [a]
 uusiReplace' (Replace _ p targets) x
   | p $ x ^. myPkgName =
-    ( \(a, b) ->
-        a
-          & myPkgName .~ b ^. myPkgName
-          & myVersionRange .~ b ^. myVersionRange
+    ( \t ->
+        x
+          & myPkgName .~ t ^. myPkgName
+          & myVersionRange .~ t ^. myVersionRange
     )
-      <$> zip (repeat x) targets
+      <$> targets
   | otherwise = []
 uusiReplace' _ _ = []
 

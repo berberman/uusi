@@ -47,7 +47,7 @@ common common-options
 library
   import:          common-options
   hs-source-dirs:  src
-  exposed-modules: 
+  exposed-modules:
     Distribution.Uusi.Core
     Distribution.Uusi.Types
     Distribution.Uusi.Utils
@@ -60,10 +60,13 @@ executable uusi
   build-depends:  uusi
   ghc-options:    -threaded -rtsopts -with-rtsopts=-N
 
-test-suite  uusi-tests
+test-suite uusi-tests
   import:         common-options
   hs-source-dirs: test
-  build-depends:  uusi, HUnit
-  type: exitcode-stdio-1.0
+  build-depends:
+    , HUnit
+    , uusi
+
+  type:           exitcode-stdio-1.0
   main-is:        Main.hs
   ghc-options:    -threaded -rtsopts -with-rtsopts=-N

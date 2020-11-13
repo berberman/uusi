@@ -52,7 +52,7 @@ cliOptions =
           )
           "PACKAGE(:VERSION_RANGE)"
       )
-      "overwrite the version range of PACKAGE | e.g. -ubase: >= 4.14 && < 4.15",
+      "overwrite the version range of PACKAGE (empty version range means `-any`) | e.g. -ubase: >= 4.14 && < 4.15",
     Option
       ['d']
       ["delete"]
@@ -74,7 +74,7 @@ cliOptions =
           )
           "SOURCE_PACKAGE:DEST1_PACKAGE(:DEST1_VERSION),DEST2_PACKAGE(:DEST2_VERSION)..."
       )
-      "replace PACKAGE with a set of packages | e.g. -rbase:text,bytestring"
+      "replace PACKAGE with a set of packages (empty version range means `-any`) | e.g. -rbase:text,bytestring"
   ]
 
 parsePkg :: String -> Maybe (PackageName, VersionRange)
