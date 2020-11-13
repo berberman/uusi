@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -13,8 +14,6 @@ import Distribution.Parsec (simpleParsec)
 import Distribution.Pretty (prettyShow)
 import Distribution.Types.CondTree
 import Distribution.Types.Dependency (Dependency (..))
-import Distribution.Types.ExeDependency (ExeDependency (..))
-import Distribution.Types.LegacyExeDependency (LegacyExeDependency (..))
 import Distribution.Types.Lens
 import Distribution.Types.PackageName
 import Distribution.Types.VersionRange
@@ -37,7 +36,7 @@ main = do
 
   unless useDefaultAction $ do
     T.putStrLn "Pending action(s):"
-    show <$> actions' |> unlines |> putStrLn
+    ("  " <>) . show <$> actions' |> unlines |> init |> putStrLn
   uusiCabal actions' target
 
 runOption :: [String] -> IO (AOption, FilePath)
@@ -97,6 +96,9 @@ removeByName name = Remove (unPackageName name |> T.pack) (== name)
 overwriteByName :: PackageName -> VersionRange -> Uusi
 overwriteByName name = SetVersion (unPackageName name |> T.pack) (== name)
 
+replaceByName :: PackageName -> [VersionedPackage] -> Uusi
+replaceByName name = Replace (unPackageName name |> T.pack) (== name)
+
 uusiCabal :: SomeUusi -> FilePath -> IO ()
 uusiCabal actions originPath = do
   T.putStrLn <| "Parsing cabal file from " <> T.pack originPath <> "..."
@@ -107,11 +109,12 @@ uusiCabal actions originPath = do
 
 -----------------------------------------------------------------------------
 
-data Action tag p = Remove tag p | SetVersion tag p VersionRange
+data Action tag p = Remove tag p | SetVersion tag p VersionRange | Replace tag p [VersionedPackage]
 
 instance (Show tag) => Show (Action tag p) where
   show (Remove tag _) = "Remove[" <> show tag <> "]"
   show (SetVersion tag _ range) = "SetVersion[" <> show tag <> ", " <> prettyShow range <> "]"
+  show (Replace tag _ targets) = "Replace[" <> show tag <> " |-> " <> T.unpack (T.intercalate ", " $ T.pack . show <$> targets) <> "]"
 
 type Uusi = Action T.Text (PackageName -> Bool)
 
@@ -119,35 +122,32 @@ type SomeUusi = [Uusi]
 
 type Op a = a -> a
 
-class HasNameAndRange a where
-  getName :: a -> PackageName
-  setRange :: VersionRange -> Op a
-  apply :: (PackageName -> Bool) -> VersionRange -> Op a
-  apply p range x
-    | p <| getName x = setRange range x
-  apply _ _ x = x
+uusiRange' :: HasVersionedPackage a => Uusi -> Op a
+uusiRange' (SetVersion _ p range) x
+  | p $ x ^. myPkgName = x & myVersionRange .~ range
+  | otherwise = x
+uusiRange' _ x = x
 
-instance HasNameAndRange Dependency where
-  getName (Dependency name _ _) = name
-  setRange range (Dependency name _ lib) = Dependency name range lib
-
-instance HasNameAndRange ExeDependency where
-  getName (ExeDependency name _ _) = name
-  setRange range (ExeDependency name component _) = ExeDependency name component range
-
-instance HasNameAndRange LegacyExeDependency where
-  getName (LegacyExeDependency name _) = mkPackageName name
-  setRange range (LegacyExeDependency name _) = LegacyExeDependency name range
-
-uusiRange' :: HasNameAndRange a => Uusi -> Op a
-uusiRange' (SetVersion _ p range) = apply p range
-uusiRange' _ = id
-
-uusiRemove :: HasNameAndRange a => SomeUusi -> Op [a]
-uusiRemove actions t = let ps = [p | a <- [actions], (Remove _ p) <- a] in filter (\x -> and <| fmap (not . (<| getName x)) ps) t
-
-uusiRange :: HasNameAndRange a => SomeUusi -> Op a
+uusiRange :: HasVersionedPackage a => SomeUusi -> Op a
 uusiRange actions = chain <| uusiRange' <$> actions
+
+uusiReplace' :: HasVersionedPackage a => Uusi -> a -> [a]
+uusiReplace' (Replace _ p targets) x
+  | p $ x ^. myPkgName =
+    ( \(a, b) ->
+        a
+          & myPkgName .~ b ^. myPkgName
+          & myVersionRange .~ b ^. myVersionRange
+    )
+      <$> zip (repeat x) targets
+  | otherwise = [x]
+uusiReplace' _ x = [x]
+
+uusiReplace :: HasVersionedPackage a => SomeUusi -> Op [a]
+uusiReplace actions t = [r | x <- t, a <- actions, r <- uusiReplace' a x]
+
+uusiRemove :: HasVersionedPackage a => SomeUusi -> Op [a]
+uusiRemove actions t = let ps = [p | a <- [actions], (Remove _ p) <- a] in filter (\x -> and <| fmap (not . (<| (x ^. myPkgName))) ps) t
 
 chain :: [Op a] -> Op a
 chain = foldr (.) id
@@ -157,12 +157,12 @@ chain = foldr (.) id
 uusiBuildInfo :: SomeUusi -> Op BuildInfo
 uusiBuildInfo actions i =
   i
-    |> (targetBuildDepends %~ fmap (uusiRange actions) . uusiRemove actions)
-    |> (buildToolDepends %~ fmap (uusiRange actions) . uusiRemove actions)
-    |> (buildTools %~ fmap (uusiRange actions) . uusiRemove actions)
+    |> (targetBuildDepends %~ fmap (uusiRange actions) . uusiReplace actions . uusiRemove actions)
+    |> (buildToolDepends %~ fmap (uusiRange actions) . uusiReplace actions . uusiRemove actions)
+    |> (buildTools %~ fmap (uusiRange actions) . uusiReplace actions . uusiRemove actions)
 
-uusiCondTree :: (HasBuildInfo a) => [Uusi] -> Op (CondTree ConfVar [Dependency] a)
-uusiCondTree actions = mapTreeData (buildInfo %~ uusiBuildInfo actions) . mapTreeConstrs (fmap (uusiRange actions) . uusiRemove actions)
+uusiCondTree :: (HasBuildInfo a) => SomeUusi -> Op (CondTree ConfVar [Dependency] a)
+uusiCondTree actions = mapTreeData (buildInfo %~ uusiBuildInfo actions) . mapTreeConstrs (fmap (uusiRange actions) . uusiReplace actions . uusiRemove actions)
 
 uusiGenericPackageDescription :: SomeUusi -> Op GenericPackageDescription
 uusiGenericPackageDescription actions cabal =

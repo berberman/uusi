@@ -30,9 +30,11 @@ source-repository head
 
 common common-options
   build-depends:
-    , base   ^>=4.14.0
-    , Cabal  ^>=3.2.0
-    , text   ^>=1.2.3
+    , base          ^>=4.14.0
+    , Cabal         ^>=3.2.0
+    , microlens     ^>=0.4.11.2
+    , microlens-th  ^>=0.4.3.6
+    , text          ^>=1.2.3
 
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-uni-patterns
