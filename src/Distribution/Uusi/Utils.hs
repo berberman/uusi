@@ -1,3 +1,9 @@
+-- | Copyright: (c) 2020 berberman
+-- SPDX-License-Identifier: MIT
+-- Maintainer: berberman <1793913507@qq.com>
+-- Stability: experimental
+-- Portability: portable
+-- Utilities that don't make a lot of sense.
 module Distribution.Uusi.Utils
   ( (|>),
     (<|),
@@ -12,12 +18,14 @@ infixl 1 |>
 
 infixr 0 <|
 
--- qwq
+-- | The same as '&', but lovelier
 (|>) :: a -> (a -> b) -> b
 (|>) = (&)
 
+-- | The same as '$', but lovelier
 (<|) :: (a -> b) -> a -> b
 (<|) = ($)
 
+-- | Connect a series of 'Op'
 chain :: [Op a] -> Op a
 chain = foldr (.) id

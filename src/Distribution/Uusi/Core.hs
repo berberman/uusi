@@ -1,6 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | Copyright: (c) 2020 berberman
+-- SPDX-License-Identifier: MIT
+-- Maintainer: berberman <1793913507@qq.com>
+-- Stability: experimental
+-- Portability: portable
+-- This module provides core functionality of @uusi@.
+-- It exports the core function 'uusiGenericPackageDescription', and some functions to create 'Uusi'.
 module Distribution.Uusi.Core
   ( uusiGenericPackageDescription,
     allToAnyVersion,
@@ -24,15 +31,19 @@ import Lens.Micro
 
 -----------------------------------------------------------------------------
 
+-- | Create 'Action' that removes all version constraints
 allToAnyVersion :: Uusi
 allToAnyVersion = SetVersion "All dependencies" (const True) anyVersion
 
+-- | Create 'Action' that removes a dependency by given its name
 removeByName :: PackageName -> Uusi
 removeByName name = Remove (unPackageName name |> T.pack) (== name)
 
+-- | Create 'Action' that overwrites a dependency's version range
 overwriteByName :: PackageName -> VersionRange -> Uusi
 overwriteByName name = SetVersion (unPackageName name |> T.pack) (== name)
 
+-- | Create 'Action' that replace a dependency with a set of packages
 replaceByName :: PackageName -> [(PackageName, VersionRange)] -> Uusi
 replaceByName name t = Replace (unPackageName name |> T.pack) (== name) (uncurry VersionedPackage <$> t)
 
@@ -82,7 +93,11 @@ uusiBuildInfo actions i =
 uusiCondTree :: (HasBuildInfo a) => SomeUusi -> Op (CondTree ConfVar [Dependency] a)
 uusiCondTree actions = mapTreeData (buildInfo %~ uusiBuildInfo actions) . mapTreeConstrs (fmap (uusiRange actions) . uusiReplace actions . uusiRemove actions)
 
-uusiGenericPackageDescription :: SomeUusi -> Op GenericPackageDescription
+-- | The core function of @uusi@.
+uusiGenericPackageDescription ::
+  -- | A list of 'Action' to apply
+  SomeUusi ->
+  Op GenericPackageDescription
 uusiGenericPackageDescription actions cabal =
   cabal
     |> (condExecutables %~ uusiTrees)

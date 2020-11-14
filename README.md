@@ -55,31 +55,38 @@ If no option is specified, `uusi` will use `-all`, removing all version constrai
 
 ### Examples
 
-Set all dependencies' version ranges to `-any`:
+* Set all dependencies' version ranges to `-any`:
 
 ```
 $ uusi foo.cabal
 ```
 
-Replace `old-time` with `time`:
+* Replace `old-time` with `time`:
 
 ```
 $ uusi -rold-time:time foo.cabal
 ```
 
-Remove `semigroup`:
+* Remove `semigroup`:
 
 ```
 $ uusi -dsemigroup foo.cabal
 ```
 
-Overwrite `base`:
+* Overwrite `base`:
 
 ```
 $ uusi -ubase: >=4.14 foo.cabal
 ```
 
 Packages have pattern `<pkgname>` or `<pkgname>:<version>`. Run this program, and see help message for details.
+
+* Together:
+
+```
+$ uusi -ubar:2999.20.1.0 -dbase -all foo.cabal
+```
+
 
 ## Contributing
 

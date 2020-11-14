@@ -1,9 +1,7 @@
 cabal-version:   2.4
 name:            uusi
 version:         0.1.0.0
-synopsis:
-  Tweak dependencies in .cabal files
-
+synopsis:        Tweak dependencies in .cabal files
 description:
   @uusi@ is a command-line program to tweak in .cabal files.
   It is used in distribution packaging.
@@ -30,11 +28,11 @@ source-repository head
 
 common common-options
   build-depends:
-    , base          ^>=4.14.0
-    , Cabal         ^>=3.2.0
-    , microlens     ^>=0.4.11.2
-    , microlens-th  ^>=0.4.3.6
-    , text          ^>=1.2.3
+    , base          >=4.8 && <5
+    , Cabal         >=2.2 && <3.1
+    , microlens     ^>=0.4
+    , microlens-th  ^>=0.4
+    , text
 
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-uni-patterns

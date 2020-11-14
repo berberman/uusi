@@ -1,6 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
+-- | Copyright: (c) 2020 berberman
+-- SPDX-License-Identifier: MIT
+-- Maintainer: berberman <1793913507@qq.com>
+-- Stability: experimental
+-- Portability: portable
+-- Types and lenses used by the library.
 module Distribution.Uusi.Types (module Distribution.Uusi.Types) where
 
 import Data.Text (Text)
@@ -17,21 +23,35 @@ import Lens.Micro.TH (makeClassy)
 
 -----------------------------------------------------------------------------
 
-data Action tag p = Remove tag p | SetVersion tag p VersionRange | Replace tag p [VersionedPackage]
+-- | Action acting on cabal dependencies.
+data Action tag p
+  = -- | For a dependency x, if P(x) then remove x
+    Remove tag p
+  | -- | For a dependency x, if P(x) then set x's version range
+    SetVersion tag p VersionRange
+  | -- | For a dependency x, if P(x) then replace x with a set of packages
+    Replace tag p [VersionedPackage]
 
 instance (Show tag) => Show (Action tag p) where
   show (Remove tag _) = "Remove[" <> show tag <> "]"
   show (SetVersion tag _ range) = "SetVersion[" <> show tag <> ", " <> prettyShow range <> "]"
   show (Replace tag _ targets) = "Replace[" <> show tag <> " |-> " <> T.unpack (T.intercalate ", " $ T.pack . show <$> targets) <> "]"
 
+-- | Common 'Action', where the predication @p@ is 'PackageName'.
 type Uusi = Action Text (PackageName -> Bool)
 
+-- | A list of 'Uusi'
 type SomeUusi = [Uusi]
 
+-- | An endo operation
 type Op a = a -> a
 
 -----------------------------------------------------------------------------
 
+-- | Super type of three kinds of dependency.
+-- Because cabal doesn't define lenses of 'Dependency', 'ExeDependency', and 'LegacyExeDependency',
+-- here comes out a general data type to define overloaded lenses.
+-- See 'HasVersionedPackage'.
 data VersionedPackage = VersionedPackage
   { _myPkgName :: PackageName,
     _myVersionRange :: VersionRange
@@ -40,6 +60,9 @@ data VersionedPackage = VersionedPackage
 instance Show VersionedPackage where
   show (VersionedPackage name range) = show (unPackageName name) <> ":" <> prettyShow range
 
+-- | Sub type of 'VersionedPackage', with 'UnqualComponentName'.
+-- Similar to 'VersionedPackage', for defining lenses.
+-- See 'HasComponentialPackage'.
 data ComponentialPackage = ComponentialPackage
   { _myCorePackage :: VersionedPackage,
     _myComponentName :: UnqualComponentName
