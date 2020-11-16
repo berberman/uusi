@@ -107,4 +107,4 @@ runOption argv = case getOpt Permute cliOptions argv of
   (o, [n], []) -> return (chain o <| defaultOptions, n)
   (_, _, err) -> ioError <| userError <| concat err <> usageInfo help cliOptions
   where
-    help = "uusi - tweak .cabal file (replace inplace) | useage: uusi [OPTIONS] TARGET"
+    help = "uusi - tweak .cabal file (replace inplace) | usage: uusi [OPTIONS] TARGET"
