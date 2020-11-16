@@ -51,6 +51,8 @@ $ cabal build
 
 * replace a dependency with given packages
 
+* generate a boilerplate `Setup.hs`
+
 If no option is specified, `uusi` will use `-all`, removing all version constraints.
 
 ### Examples

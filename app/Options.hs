@@ -25,12 +25,13 @@ data Options = Options
   { optAll :: Bool,
     optOverwrite :: SomeUusi,
     optRemove :: SomeUusi,
-    optReplace :: SomeUusi
+    optReplace :: SomeUusi,
+    optGenSetup :: Bool
   }
   deriving stock (Show)
 
 defaultOptions :: Options
-defaultOptions = Options False [] [] []
+defaultOptions = Options False [] [] [] False
 
 joinOptions :: Options -> SomeUusi
 joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace
@@ -74,7 +75,12 @@ cliOptions =
           )
           "SOURCE_PACKAGE:DEST1_PACKAGE(:DEST1_VERSION),DEST2_PACKAGE(:DEST2_VERSION)..."
       )
-      "replace PACKAGE with a set of packages (empty version range means `-any`) | e.g. -rbase:text,bytestring"
+      "replace PACKAGE with a set of packages (empty version range means `-any`) | e.g. -rbase:text,bytestring",
+    Option
+      []
+      ["gen-setup"]
+      (NoArg (\opts -> opts {optGenSetup = True}))
+      "generate Setup.hs"
   ]
 
 parsePkg :: String -> Maybe (PackageName, VersionRange)
