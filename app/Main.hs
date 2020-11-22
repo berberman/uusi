@@ -36,7 +36,7 @@ main = do
     T.putStrLn $ "Write file: " <> T.pack path
 
   when useDefaultAction $
-    T.putStrLn "You didn't pass any option, use -all."
+    T.putStrLn "You didn't pass any option, use --all."
 
   unless useDefaultAction $ do
     T.putStrLn "Pending action(s):"
