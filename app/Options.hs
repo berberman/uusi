@@ -42,7 +42,7 @@ cliOptions =
       []
       ["all"]
       (NoArg (\opts -> opts {optAll = True}))
-      "remove all version constraints | e.g. -all",
+      "remove all version constraints | e.g. --all",
     Option
       ['u']
       ["update"]
