@@ -3,6 +3,12 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.3.0.0
+
+* Add `--buildable` and `--no-buildable`
+
+* Fix a typo in prompt [#5](https://github.com/berberman/uusi/pull/5)
+
 ## 0.2.1.0
 
 * Add `--gen-setup`
