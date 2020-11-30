@@ -53,14 +53,14 @@ $ cabal build
 
 * generate a boilerplate `Setup.hs`
 
-If no option is specified, `uusi` will use `-all`, removing all version constraints.
+If no option is specified, `uusi` will use `--all`, removing all version constraints.
 
 ### Examples
 
-* Set all dependencies' version ranges to `-any`:
+* Set all dependencies' version ranges to `-any` and generate `Setup.hs`:
 
 ```
-$ uusi foo.cabal
+$ uusi --gen-setup foo.cabal
 ```
 
 * Replace `old-time` with `time`:
@@ -86,7 +86,7 @@ Packages have pattern `<pkgname>` or `<pkgname>:<version>`. Run this program, an
 * Together:
 
 ```
-$ uusi -ubar:2999.20.1.0 -dbase -all foo.cabal
+$ uusi -ubar:2999.20.1.0 -dbase --all foo.cabal
 ```
 
 

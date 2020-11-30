@@ -3,6 +3,12 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.2.1.0
+
+* Add `--gen-setup`
+
+* Fix typo
+
 ## 0.2.0.0
 
 * Provide functionalities other than removing all version constraints
