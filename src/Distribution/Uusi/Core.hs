@@ -49,6 +49,7 @@ overwriteByName name = SetVersion (unPackageName name |> T.pack) (== name)
 replaceByName :: PackageName -> [(PackageName, VersionRange)] -> Uusi
 replaceByName name t = Replace (unPackageName name |> T.pack) (== name) (uncurry VersionedPackage <$> t)
 
+-- | Create 'Action' that set the buildable of a component
 buildableByName :: UnqualComponentName -> Bool -> Uusi
 buildableByName name = SetBuildable (unUnqualComponentName name |> T.pack) (== name)
 

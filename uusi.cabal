@@ -1,6 +1,6 @@
 cabal-version:   2.4
 name:            uusi
-version:         0.2.1.0
+version:         0.3.0.0
 synopsis:        Tweak dependencies in .cabal files
 description:
   @uusi@ is a command-line program to tweak .cabal files.

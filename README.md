@@ -53,6 +53,8 @@ $ cabal build
 
 * generate a boilerplate `Setup.hs`
 
+* set the `buildable` of a component 
+
 If no option is specified, `uusi` will use `--all`, removing all version constraints.
 
 ### Examples
@@ -89,6 +91,11 @@ Packages have pattern `<pkgname>` or `<pkgname>:<version>`. Run this program, an
 $ uusi -ubar:2999.20.1.0 -dbase --all foo.cabal
 ```
 
+* Do not build `foo-test`:
+
+```
+$ uusi -nb foo-test foo.cabal
+```
 
 ## Contributing
 

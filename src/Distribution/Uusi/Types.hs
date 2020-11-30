@@ -31,6 +31,7 @@ data Action tag
     SetVersion tag (PackageName -> Bool) VersionRange
   | -- | For a dependency x, if P(x) then replace x with a set of packages
     Replace tag (PackageName -> Bool) [VersionedPackage]
+    -- | For a component x, if P(x) then set the buildable of x
   | SetBuildable tag (UnqualComponentName -> Bool) Bool
 
 instance (Show tag) => Show (Action tag) where
