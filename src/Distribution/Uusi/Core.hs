@@ -14,6 +14,7 @@ module Distribution.Uusi.Core
     removeByName,
     overwriteByName,
     replaceByName,
+    buildableByName,
   )
 where
 
@@ -24,6 +25,7 @@ import Distribution.Types.CondTree (CondTree, mapTreeConstrs, mapTreeData)
 import Distribution.Types.Dependency (Dependency)
 import Distribution.Types.Lens
 import Distribution.Types.PackageName (PackageName, unPackageName)
+import Distribution.Types.UnqualComponentName
 import Distribution.Types.VersionRange (VersionRange, anyVersion)
 import Distribution.Uusi.Types
 import Distribution.Uusi.Utils
@@ -46,6 +48,9 @@ overwriteByName name = SetVersion (unPackageName name |> T.pack) (== name)
 -- | Create 'Action' that replace a dependency with a set of packages
 replaceByName :: PackageName -> [(PackageName, VersionRange)] -> Uusi
 replaceByName name t = Replace (unPackageName name |> T.pack) (== name) (uncurry VersionedPackage <$> t)
+
+buildableByName :: UnqualComponentName -> Bool -> Uusi
+buildableByName name = SetBuildable (unUnqualComponentName name |> T.pack) (== name)
 
 -----------------------------------------------------------------------------
 
@@ -81,6 +86,13 @@ uusiReplace actions t =
 uusiRemove :: HasVersionedPackage a => SomeUusi -> Op [a]
 uusiRemove actions t = let ps = [p | (Remove _ p) <- actions] in filter (\x -> and <| fmap (not . (<| (x ^. myPkgName))) ps) t
 
+uusiBuildable :: HasBuildInfo a => SomeUusi -> Op (UnqualComponentName, CondTree ConfVar [Dependency] a)
+uusiBuildable actions t
+  | (name, tree) <- t,
+    (b : _) <- [b | (SetBuildable _ p b) <- actions, p name] =
+    (name, mapTreeData (buildInfo %~ buildable .~ b) tree)
+  | otherwise = t
+
 -----------------------------------------------------------------------------
 
 uusiBuildInfo :: SomeUusi -> Op BuildInfo
@@ -106,4 +118,4 @@ uusiGenericPackageDescription actions cabal =
     |> (condSubLibraries %~ uusiTrees)
     |> (condLibrary . mapped %~ uusiCondTree actions)
   where
-    uusiTrees trees = trees <&> _2 %~ uusiCondTree actions
+    uusiTrees trees = trees <&> _2 %~ uusiCondTree actions <&> uusiBuildable actions

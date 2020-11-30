@@ -24,21 +24,23 @@ import Lens.Micro.TH (makeClassy)
 -----------------------------------------------------------------------------
 
 -- | Action acting on cabal dependencies.
-data Action tag p
+data Action tag
   = -- | For a dependency x, if P(x) then remove x
-    Remove tag p
+    Remove tag (PackageName -> Bool)
   | -- | For a dependency x, if P(x) then set x's version range
-    SetVersion tag p VersionRange
+    SetVersion tag (PackageName -> Bool) VersionRange
   | -- | For a dependency x, if P(x) then replace x with a set of packages
-    Replace tag p [VersionedPackage]
+    Replace tag (PackageName -> Bool) [VersionedPackage]
+  | SetBuildable tag (UnqualComponentName -> Bool) Bool
 
-instance (Show tag) => Show (Action tag p) where
+instance (Show tag) => Show (Action tag) where
   show (Remove tag _) = "Remove[" <> show tag <> "]"
   show (SetVersion tag _ range) = "SetVersion[" <> show tag <> ", " <> prettyShow range <> "]"
   show (Replace tag _ targets) = "Replace[" <> show tag <> " |-> " <> T.unpack (T.intercalate ", " $ T.pack . show <$> targets) <> "]"
+  show (SetBuildable tag _ buildable) = "SetBuildable[" <> show tag <> ", " <> show buildable <> "]"
 
 -- | Common 'Action', where the predication @p@ is 'PackageName'.
-type Uusi = Action Text (PackageName -> Bool)
+type Uusi = Action Text
 
 -- | A list of 'Uusi'
 type SomeUusi = [Uusi]

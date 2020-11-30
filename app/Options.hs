@@ -26,15 +26,17 @@ data Options = Options
     optOverwrite :: SomeUusi,
     optRemove :: SomeUusi,
     optReplace :: SomeUusi,
-    optGenSetup :: Bool
+    optGenSetup :: Bool,
+    optBuild :: SomeUusi,
+    optNoBuild :: SomeUusi
   }
   deriving stock (Show)
 
 defaultOptions :: Options
-defaultOptions = Options False [] [] [] False
+defaultOptions = Options False [] [] [] False [] []
 
 joinOptions :: Options -> SomeUusi
-joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace
+joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace <> optBuild <> optNoBuild
 
 cliOptions :: [OptDescr (Options -> Options)]
 cliOptions =
@@ -80,7 +82,29 @@ cliOptions =
       []
       ["gen-setup"]
       (NoArg (\opts -> opts {optGenSetup = True}))
-      "generate Setup.hs"
+      "generate Setup.hs",
+    Option
+      ['b']
+      ["buildable"]
+      ( ReqArg
+          ( \arg opts -> case parseBuildable arg True of
+              Just action -> opts {optBuild = action : optBuild opts}
+              _ -> error $ "failed to parse build" <> arg
+          )
+          "COMPONENT"
+      )
+      "set the buildable of a component to true | e.g. -b foo-test",
+    Option
+      []
+      ["no-buildable", "nb"]
+      ( ReqArg
+          ( \arg opts -> case parseBuildable arg False of
+              Just action -> opts {optNoBuild = action : optNoBuild opts}
+              _ -> error $ "failed to parse build" <> arg
+          )
+          "COMPONENT"
+      )
+      "set the buildable of a component to false | e.g. --nb foo-test"
   ]
 
 parsePkg :: String -> Maybe (PackageName, VersionRange)
@@ -101,6 +125,9 @@ parseReplace (T.pack -> s)
     not <| null action =
     action |> replaceByName source |> Just
   | otherwise = Nothing
+
+parseBuildable :: String -> Bool -> Maybe Uusi
+parseBuildable s b = flip buildableByName b <$> simpleParsec s
 
 runOption :: [String] -> IO (Options, FilePath)
 runOption argv = case getOpt Permute cliOptions argv of
