@@ -51,11 +51,11 @@ $ cabal build
 
 * replace a dependency with given packages
 
-* generate a boilerplate `Setup.hs`
-
 * set the `buildable` of a component 
 
 If no option is specified, `uusi` will use `--all`, removing all version constraints.
+
+`uusi` provides an executable `gen-setup` to generate a boilerplate `Setup.hs`.
 
 ### Examples
 

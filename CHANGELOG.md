@@ -3,6 +3,14 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.3.1.0
+
+* Remove `--gen-setup` from options of `uusi`
+
+* Add `gen-setup` executable
+
+* Clearify cabal version constraint
+
 ## 0.3.0.0
 
 * Add `--buildable` and `--no-buildable`
