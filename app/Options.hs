@@ -26,14 +26,13 @@ data Options = Options
     optOverwrite :: SomeUusi,
     optRemove :: SomeUusi,
     optReplace :: SomeUusi,
-    optGenSetup :: Bool,
     optBuild :: SomeUusi,
     optNoBuild :: SomeUusi
   }
   deriving stock (Show)
 
 defaultOptions :: Options
-defaultOptions = Options False [] [] [] False [] []
+defaultOptions = Options False [] [] [] [] []
 
 joinOptions :: Options -> SomeUusi
 joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace <> optBuild <> optNoBuild
@@ -78,11 +77,6 @@ cliOptions =
           "SOURCE_PACKAGE:DEST1_PACKAGE(:DEST1_VERSION),DEST2_PACKAGE(:DEST2_VERSION)..."
       )
       "replace PACKAGE with a set of packages (empty version range means `-any`) | e.g. -rbase:text,bytestring",
-    Option
-      []
-      ["gen-setup"]
-      (NoArg (\opts -> opts {optGenSetup = True}))
-      "generate Setup.hs",
     Option
       ['b']
       ["buildable"]

@@ -1,7 +1,9 @@
 cradle:
   cabal:
     - path: "./app"
-      component: "exe:uusi"    
+      component: "exe:uusi"        
+    - path: "./gen-setup"
+      component: "exe:gen-setup"    
     - path: "./src"
       component: "lib:uusi"
     - path: "./test"

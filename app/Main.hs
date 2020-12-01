@@ -14,26 +14,16 @@ import Distribution.Uusi.Utils
 import qualified Distribution.Verbosity as Verbosity
 import Options
 import System.Environment (getArgs)
-import System.FilePath (takeDirectory, (</>))
 
 -----------------------------------------------------------------------------
 
 main :: IO ()
 main = do
   args <- getArgs
-  (o@Options {..}, target) <- runOption args
+  (o, target) <- runOption args
   let actions = joinOptions o
       useDefaultAction = null actions
       actions' = if useDefaultAction then [allToAnyVersion] else actions
-
-  when optGenSetup $ do
-    let path = takeDirectory target </> "Setup.hs"
-    writeFile path $
-      unlines
-        [ "import Distribution.Simple",
-          "main = defaultMain"
-        ]
-    T.putStrLn $ "Write file: " <> T.pack path
 
   when useDefaultAction $
     T.putStrLn "You didn't pass any option, use --all."
