@@ -59,10 +59,10 @@ If no option is specified, `uusi` will use `--all`, removing all version constra
 
 ### Examples
 
-* Set all dependencies' version ranges to `-any` and generate `Setup.hs`:
+* Set all dependencies' version ranges to `-any`:
 
 ```
-$ uusi --gen-setup foo.cabal
+$ uusi foo.cabal
 ```
 
 * Replace `old-time` with `time`:
