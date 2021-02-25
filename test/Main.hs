@@ -68,7 +68,7 @@ testReplaceAndRemove =
         [removeByName name1, replaceByName name2 targets]
         (\k -> [r | x <- k, r <- if x ^. myPkgName == name2 then fmap (\(n, v) -> x & myPkgName .~ n & myVersionRange .~ v) targets else [x], r ^. myPkgName /= name1])
 
-createTest :: String -> SomeUusi -> Op [Dependency] -> Test
+createTest :: String -> Uusis -> Op [Dependency] -> Test
 createTest label actions f = label ~: expectedDeps ~=? afterDeps
   where
     origin = parseCabalFile cabalFile

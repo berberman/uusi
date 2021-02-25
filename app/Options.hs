@@ -23,19 +23,20 @@ import System.Console.GetOpt
 
 data Options = Options
   { optAll :: Bool,
-    optOverwrite :: SomeUusi,
-    optRemove :: SomeUusi,
-    optReplace :: SomeUusi,
-    optBuild :: SomeUusi,
-    optNoBuild :: SomeUusi
+    optOverwrite :: Uusis,
+    optRemove :: Uusis,
+    optReplace :: Uusis,
+    optBuild :: Uusis,
+    optNoBuild :: Uusis,
+    optOptions :: Uusis
   }
   deriving stock (Show)
 
 defaultOptions :: Options
-defaultOptions = Options False [] [] [] [] []
+defaultOptions = Options False [] [] [] [] [] []
 
-joinOptions :: Options -> SomeUusi
-joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace <> optBuild <> optNoBuild
+joinOptions :: Options -> Uusis
+joinOptions Options {..} = [allToAnyVersion | optAll] <> optOverwrite <> optRemove <> optReplace <> optBuild <> optNoBuild <> optOptions
 
 cliOptions :: [OptDescr (Options -> Options)]
 cliOptions =
@@ -83,7 +84,7 @@ cliOptions =
       ( ReqArg
           ( \arg opts -> case parseBuildable arg True of
               Just action -> opts {optBuild = action : optBuild opts}
-              _ -> error $ "failed to parse build" <> arg
+              _ -> error $ "failed to parse build: " <> arg
           )
           "COMPONENT"
       )
@@ -94,11 +95,33 @@ cliOptions =
       ( ReqArg
           ( \arg opts -> case parseBuildable arg False of
               Just action -> opts {optNoBuild = action : optNoBuild opts}
-              _ -> error $ "failed to parse build" <> arg
+              _ -> error $ "failed to parse no build:" <> arg
           )
           "COMPONENT"
       )
-      "set the buildable of a component to false | e.g. --nb foo-test"
+      "set the buildable of a component to false | e.g. --nb foo-test",
+    Option
+      []
+      ["options", "opt"]
+      ( ReqArg
+          ( \arg opts -> case parseComponentOpt arg of
+              Just action -> opts {optNoBuild = action : optNoBuild opts}
+              _ -> error $ "failed to parse compoennt opt: " <> arg
+          )
+          "COMPONENT:OPTION_1,OPTION_2,..."
+      )
+      "append ghc-options to a component | e.g. --options foo-test:-Wall,--Wpartial-fields",
+    Option
+      []
+      ["all-options", "all-opt"]
+      ( ReqArg
+          ( \arg opts -> case parseOpt arg of
+              Just x -> opts {optOptions = addOptionsForAll x : optOptions opts}
+              _ -> error $ "failed to parse all opt: " <> arg
+          )
+          "OPTION_1,OPTION_2,..."
+      )
+      "append ghc-options to a component | e.g. --all-options -Wall,--Wpartial-fields"
   ]
 
 parsePkg :: String -> Maybe (PackageName, VersionRange)
@@ -122,6 +145,20 @@ parseReplace (T.pack -> s)
 
 parseBuildable :: String -> Bool -> Maybe Uusi
 parseBuildable s b = flip buildableByName b <$> simpleParsec s
+
+parseOpt :: String -> Maybe [String]
+parseOpt (T.pack -> s) =
+  let s' = T.splitOn "," s
+   in if all ((== '-') . T.head) s' then Just (fmap T.unpack s') else Nothing
+
+parseComponentOpt :: String -> Maybe Uusi
+parseComponentOpt (T.pack -> s)
+  | (Just name) <- s |> T.takeWhile (/= ':') |> T.unpack |> simpleParsec,
+    k <- s |> T.dropWhile (/= ':') |> T.tail,
+    not <| T.null k,
+    Just opts <- parseOpt $ T.unpack k =
+    Just $ optionsByName name (<> opts)
+  | otherwise = Nothing
 
 runOption :: [String] -> IO (Options, FilePath)
 runOption argv = case getOpt Permute cliOptions argv of

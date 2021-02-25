@@ -35,7 +35,7 @@ main = do
 
 -----------------------------------------------------------------------------
 
-uusiCabal :: SomeUusi -> FilePath -> IO ()
+uusiCabal :: Uusis -> FilePath -> IO ()
 uusiCabal actions originPath = do
   T.putStrLn <| "Parsing cabal file from " <> T.pack originPath <> "..."
   cabal <- readGenericPackageDescription Verbosity.normal originPath

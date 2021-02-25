@@ -31,20 +31,23 @@ data Action tag
     SetVersion tag (PackageName -> Bool) VersionRange
   | -- | For a dependency x, if P(x) then replace x with a set of packages
     Replace tag (PackageName -> Bool) [VersionedPackage]
-    -- | For a component x, if P(x) then set the buildable of x
-  | SetBuildable tag (UnqualComponentName -> Bool) Bool
+  | -- | For a component x, if P(x) then set the buildable of x
+    SetBuildable tag (UnqualComponentName -> Bool) Bool
+  | -- | For a component or library x, if P(x) then modify build options of x
+    ModifyBuiltOptions tag (UnqualComponentName -> Bool) (Op [String])
 
 instance (Show tag) => Show (Action tag) where
   show (Remove tag _) = "Remove[" <> show tag <> "]"
   show (SetVersion tag _ range) = "SetVersion[" <> show tag <> ", " <> prettyShow range <> "]"
   show (Replace tag _ targets) = "Replace[" <> show tag <> " |-> " <> T.unpack (T.intercalate ", " $ T.pack . show <$> targets) <> "]"
   show (SetBuildable tag _ buildable) = "SetBuildable[" <> show tag <> ", " <> show buildable <> "]"
+  show (ModifyBuiltOptions tag _ _) = "ModifyBuiltOptions[" <> show tag <> "]"
 
--- | Common 'Action', where the predication @p@ is 'PackageName'.
+-- | Common 'Action', where the tag 'Text'.
 type Uusi = Action Text
 
 -- | A list of 'Uusi'
-type SomeUusi = [Uusi]
+type Uusis = [Uusi]
 
 -- | An endo operation
 type Op a = a -> a
