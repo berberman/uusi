@@ -102,7 +102,7 @@ cliOptions =
       "set the buildable of a component to false | e.g. --nb foo-test",
     Option
       []
-      ["options", "opt"]
+      ["add-options", "add-opt"]
       ( ReqArg
           ( \arg opts -> case parseComponentOpt arg of
               Just action -> opts {optNoBuild = action : optNoBuild opts}
@@ -110,10 +110,10 @@ cliOptions =
           )
           "COMPONENT:OPTION_1,OPTION_2,..."
       )
-      "append ghc-options to a component | e.g. --options foo-test:-Wall,--Wpartial-fields",
+      "append ghc-options to a component | e.g. --add-options foo-test:-Wall,--Wpartial-fields",
     Option
       []
-      ["all-options", "all-opt"]
+      ["add-options-all", "add-opt-all"]
       ( ReqArg
           ( \arg opts -> case parseOpt arg of
               Just x -> opts {optOptions = addOptionsForAll x : optOptions opts}
@@ -121,7 +121,18 @@ cliOptions =
           )
           "OPTION_1,OPTION_2,..."
       )
-      "append ghc-options to a component | e.g. --all-options -Wall,--Wpartial-fields"
+      "append ghc-options to all components | e.g. --add-options-all -Wall,--Wpartial-fields",
+    Option
+      []
+      ["remove-options-all", "remove-opt-all"]
+      ( ReqArg
+          ( \arg opts -> case parseOpt arg of
+              Just x -> opts {optOptions = removeOptionsForAll x : optOptions opts}
+              _ -> error $ "failed to parse all opt: " <> arg
+          )
+          "OPTION_1,OPTION_2,..."
+      )
+      "remove ghc-options from all components | e.g. --remove-options-all -Wall,--Wpartial-fields"
   ]
 
 parsePkg :: String -> Maybe (PackageName, VersionRange)
@@ -149,7 +160,7 @@ parseBuildable s b = flip buildableByName b <$> simpleParsec s
 parseOpt :: String -> Maybe [String]
 parseOpt (T.pack -> s) =
   let s' = T.splitOn "," s
-   in if all ((== '-') . T.head) s' then Just (fmap T.unpack s') else Nothing
+   in if all ((== '-') . T.head) s' then Just (fmap (T.unpack . T.strip) s') else Nothing
 
 parseComponentOpt :: String -> Maybe Uusi
 parseComponentOpt (T.pack -> s)

@@ -4,7 +4,7 @@
 
 -- | Copyright: (c) 2020 berberman
 -- SPDX-License-Identifier: MIT
--- Maintainer: berberman <1793913507@qq.com>
+-- Maintainer: berberman <berberman.yandex.com>
 -- Stability: experimental
 -- Portability: portable
 -- This module provides core functionality of @uusi@.
@@ -18,6 +18,7 @@ module Distribution.Uusi.Core
     buildableByName,
     optionsByName,
     addOptionsForAll,
+    removeOptionsForAll,
   )
 where
 
@@ -49,15 +50,15 @@ removeByName name = Remove (unPackageName name |> T.pack) (== name)
 overwriteByName :: PackageName -> VersionRange -> Uusi
 overwriteByName name = SetVersion (unPackageName name |> T.pack) (== name)
 
--- | Create 'Action' that replace a dependency with a set of packages
+-- | Create 'Action' that replaces a dependency with a set of packages
 replaceByName :: PackageName -> [(PackageName, VersionRange)] -> Uusi
 replaceByName name t = Replace (unPackageName name |> T.pack) (== name) (uncurry VersionedPackage <$> t)
 
--- | Create 'Action' that set the buildable of a component (not library)
+-- | Create 'Action' that sets the buildable of a component (not library)
 buildableByName :: UnqualComponentName -> Bool -> Uusi
 buildableByName name = SetBuildable (unUnqualComponentName name |> T.pack) (== name)
 
--- | Create 'Action' that modify ghc-options of a component (or the library, if @name == "library"@)
+-- | Create 'Action' that modifies ghc-options of a component (or the library, if @name == "library"@)
 optionsByName :: UnqualComponentName -> Op [String] -> Uusi
 optionsByName name = ModifyBuiltOptions (unUnqualComponentName name |> T.pack) (== name)
 
@@ -68,6 +69,14 @@ addOptionsForAll opts =
     ("Add " <> T.pack (show opts) <> " to all components and the library")
     (const True)
     (<> opts)
+
+-- | Create 'Action' that removes @opts@ from ghc-options of all components and the library
+removeOptionsForAll :: [String] -> Uusi
+removeOptionsForAll opts =
+  ModifyBuiltOptions
+    ("Remove " <> T.pack (show opts) <> " from all components and the library")
+    (const True)
+    (filter (`notElem` opts))
 
 -----------------------------------------------------------------------------
 

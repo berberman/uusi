@@ -53,6 +53,8 @@ $ cabal build
 
 * set the `buildable` of a component 
 
+* modify `ghc-options` of a component
+
 If no option is specified, `uusi` will use `--all`, removing all version constraints.
 
 `uusi` provides an executable `gen-setup` to generate a boilerplate `Setup.hs`.
@@ -95,6 +97,24 @@ $ uusi -ubar:2999.20.1.0 -dbase --all foo.cabal
 
 ```
 $ uusi -nb foo-test foo.cabal
+```
+
+* Add `dynamic` to `ghc-options` of `foo-test`:
+
+```
+$ uusi --add-options foo-test:-dynamic foo.cabal
+```
+
+* Add `-dynamic` to `ghc-options` of all components:
+
+```
+$ uusi --add-options-all -dynamic foo.cabal
+```
+
+* Remove `-Wall` and `-dynamic` from `ghc-options` of all components:
+
+```
+$ uusi --remove-options-all -Wall,-dynamic 
 ```
 
 ## Contributing
