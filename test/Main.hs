@@ -16,8 +16,8 @@ import Distribution.Types.VersionRange
     anyVersion,
   )
 import Distribution.Uusi.Core
+import Distribution.Uusi.Lens
 import Distribution.Uusi.Types
-import Lens.Micro
 import Test.HUnit
 
 main :: IO ()

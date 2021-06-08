@@ -2,9 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 
--- | Copyright: (c) 2020 berberman
+-- | Copyright: (c) 2020-2021 berberman
 -- SPDX-License-Identifier: MIT
--- Maintainer: berberman <berberman.yandex.com>
+-- Maintainer: berberman <berberman@yandex.com>
 -- Stability: experimental
 -- Portability: portable
 -- This module provides core functionality of @uusi@.
@@ -34,7 +34,7 @@ import Distribution.Types.UnqualComponentName
 import Distribution.Types.VersionRange (VersionRange, anyVersion)
 import Distribution.Uusi.Types
 import Distribution.Uusi.Utils
-import Lens.Micro
+import Distribution.Uusi.Lens
 
 -----------------------------------------------------------------------------
 

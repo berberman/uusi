@@ -1,6 +1,6 @@
 cabal-version:   2.4
 name:            uusi
-version:         0.4.0.0
+version:         0.4.1.0
 synopsis:        Tweak .cabal files
 description:
   @uusi@ is a command-line program to tweak .cabal files.
@@ -12,8 +12,8 @@ bug-reports:     https://github.com/berberman/uusi/issues
 license:         MIT
 license-file:    LICENSE
 author:          berberman
-maintainer:      berberman <berberman.yandex.com>
-copyright:       2020 berberman
+maintainer:      berberman <berberman@yandex.com>
+copyright:       2020-2021 berberman
 category:        Distribution
 build-type:      Simple
 extra-doc-files:
@@ -35,10 +35,8 @@ source-repository head
 
 common common-options
   build-depends:
-    , base          >=4.8 && <5
-    , Cabal         >=3.0
-    , microlens     ^>=0.4
-    , microlens-th  ^>=0.4
+    , base   >=4.8 && <5
+    , Cabal  >=3.0
     , text
 
   ghc-options:
@@ -54,6 +52,7 @@ library
   hs-source-dirs:  src
   exposed-modules:
     Distribution.Uusi.Core
+    Distribution.Uusi.Lens
     Distribution.Uusi.Types
     Distribution.Uusi.Utils
 
