@@ -16,7 +16,7 @@
         with haskell.lib; {
           inherit uusi;
           uusi-dev =
-            addBuildTools uusi [ haskell-language-server cabal-install ];
+            addBuildTools uusi [ cabal-install ];
         };
       defaultPackage.x86_64-linux = uusi;
       devShell.x86_64-linux = uusi-dev.envFunc { };
