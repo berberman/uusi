@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 
 module Main (main) where
 
@@ -10,7 +11,9 @@ import Distribution.PackageDescription.Parsec
   )
 import Distribution.Parsec (simpleParsec)
 import Distribution.Simple.Utils (toUTF8BS)
+#if !MIN_VERSION_Cabal(3,4,0)
 import Distribution.Types.Dependency (Dependency)
+#endif
 import Distribution.Types.VersionRange
   ( VersionRange,
     anyVersion,
@@ -52,7 +55,7 @@ testRemove =
 testReplace :: Test
 testReplace =
   let name = "base"
-      targets = zip ["apple", "banana"] (repeat $ versionRange "-any")
+      targets = zip ["apple", "banana"] (repeat anyVersion)
    in createTest
         "replace"
         [replaceByName name targets]
@@ -62,7 +65,7 @@ testReplaceAndRemove :: Test
 testReplaceAndRemove =
   let name1 = "d"
       name2 = "base"
-      targets = zip ["apple", "banana"] (repeat $ versionRange "-any")
+      targets = zip ["apple", "banana"] (repeat anyVersion)
    in createTest
         "replace and remove"
         [removeByName name1, replaceByName name2 targets]
