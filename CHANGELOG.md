@@ -3,6 +3,10 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.4.2.0
+
+* Support `Cabal-3.4`
+
 ## 0.4.1.0
 
 * Remove `microlens` and `microlens-th` - now `uusi` only depends on boot libs
