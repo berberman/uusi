@@ -171,9 +171,9 @@ parseComponentOpt (T.pack -> s)
     Just $ optionsByName name (<> opts)
   | otherwise = Nothing
 
-runOption :: [String] -> IO (Options, FilePath)
+runOption :: [String] -> IO (Options, [FilePath])
 runOption argv = case getOpt Permute cliOptions argv of
-  (o, [n], []) -> return (chain o <| defaultOptions, n)
+  (o, n, []) -> return (chain o <| defaultOptions, n)
   (_, _, err) -> ioError <| userError <| concat err <> usageInfo help cliOptions
   where
-    help = "uusi - tweak .cabal file (replace inplace) | usage: uusi [OPTIONS] TARGET"
+    help = "uusi - tweak .cabal file (replace inplace) | usage: uusi [OPTIONS] [TARGET] | find cabal file in cwd if target is not set"

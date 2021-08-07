@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -8,6 +9,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Distribution.PackageDescription.Parsec (readGenericPackageDescription)
 import Distribution.PackageDescription.PrettyPrint (showGenericPackageDescription)
+import Distribution.Simple.Utils (findPackageDesc)
 import Distribution.Uusi.Core
 import Distribution.Uusi.Types
 import Distribution.Uusi.Utils
@@ -20,7 +22,13 @@ import System.Environment (getArgs)
 main :: IO ()
 main = do
   args <- getArgs
-  (o, target) <- runOption args
+  (o, targets) <- runOption args
+
+  target <- case targets of
+    [x] -> pure x
+    [] -> findCabal
+    _ -> fail "Please specify at most one target to uusi"
+
   let actions = joinOptions o
       useDefaultAction = null actions
       actions' = if useDefaultAction then [allToAnyVersion] else actions
@@ -42,3 +50,9 @@ uusiCabal actions originPath = do
   let uusi = showGenericPackageDescription <| uusiGenericPackageDescription actions cabal
   writeFile originPath uusi
   T.putStrLn <| "Write file: " <> T.pack originPath
+
+findCabal :: IO FilePath
+findCabal =
+  findPackageDesc "." >>= \case
+    Left err -> fail err
+    Right x -> pure x
