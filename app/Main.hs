@@ -8,7 +8,7 @@ module Main (main) where
 import Control.Monad (unless, when)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-#if !MIN_VERSION_Cabal(3,10,0)
+#if !MIN_VERSION_Cabal(3,6,0)
 import Distribution.PackageDescription.Parsec (readGenericPackageDescription)
 #else
 import Distribution.Simple.PackageDescription (readGenericPackageDescription)

@@ -34,7 +34,7 @@ source-repository head
 common common-options
   build-depends:
     , base   >=4.8 && <5
-    , Cabal  ^>=3.2 || ^>=3.4 || ^>=3.10
+    , Cabal  ^>=3.2 || ^>=3.4 || ==3.6.3 || >=3.8
     , text
 
   ghc-options:
