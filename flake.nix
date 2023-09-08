@@ -5,10 +5,10 @@
     let
       pkgs = import nixpkgs {
         system = "x86_64-linux";
-        overlays = [ self.overlay ];
+        overlays = [ self.overlays.default ];
       };
     in with pkgs; {
-      overlay = self: super:
+      overlays.default = self: super:
         let
           hpkgs = super.haskellPackages;
           uusi = hpkgs.callCabal2nix "uusi" ./. { };
@@ -16,9 +16,9 @@
         with haskell.lib; {
           inherit uusi;
           uusi-dev =
-            addBuildTools uusi [ cabal-install ];
+            addBuildTools uusi [ cabal-install haskell-language-server ];
         };
-      defaultPackage.x86_64-linux = uusi;
-      devShell.x86_64-linux = uusi-dev.envFunc { };
+      packages.x86_64-linux.default = uusi;
+      devShells.x86_64-linux.default = uusi-dev.envFunc { };
     };
 }

@@ -1,6 +1,6 @@
 cabal-version:   2.4
 name:            uusi
-version:         0.4.2.0
+version:         0.4.3.0
 synopsis:        Tweak .cabal files
 description:
   @uusi@ is a command-line program to tweak .cabal files.
@@ -13,7 +13,7 @@ license:         MIT
 license-file:    LICENSE
 author:          berberman
 maintainer:      berberman <berberman@yandex.com>
-copyright:       2020-2021 berberman
+copyright:       2020-2023 berberman
 category:        Distribution
 build-type:      Simple
 extra-doc-files:

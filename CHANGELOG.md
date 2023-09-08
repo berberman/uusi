@@ -3,6 +3,11 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.4.3.0
+
+* Use .cabal file in cwd if the target is not set
+* Support `Cabal` 3.6, 3.8, and 3.10.
+
 ## 0.4.2.0
 
 * Support `Cabal-3.4`
