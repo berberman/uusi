@@ -8,3 +8,5 @@ cradle:
       component: "lib:uusi"
     - path: "./test"
       component: "test:uusi-tests"
+    - path: "./uusi-extract"
+      component: "exe:uusi-extract"

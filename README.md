@@ -58,6 +58,8 @@ If no option is specified, `uusi` will use `--all`, removing all version constra
 
 `uusi` provides an executable `gen-setup` to generate a boilerplate `Setup.hs`.
 
+Another executable, `uusi-extract`, prints out package information like the version or package name.
+
 ### Examples
 
 * Set all dependencies' version ranges to any version:
@@ -114,6 +116,20 @@ $ uusi --add-options-all -dynamic foo.cabal
 
 ```
 $ uusi --remove-options-all -Wall,-dynamic 
+```
+
+#### uusi-extract
+
+* print package version:
+
+```
+$ uusi-extract --print-version
+```
+
+* print package name:
+
+```
+$ uusi-extract --print-name
 ```
 
 ## Contributing
