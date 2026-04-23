@@ -12,20 +12,20 @@ jobs:
     strategy:
       matrix:
         cabal: ["3.4.0.0", "3.8.1.0", "3.10.1.0"]
-        ghc: ["9.0.2", "9.2.8", "9.4.7", "9.6.2", "9.8.1"]
+        ghc: ["9.2.8", "9.4.7", "9.6.2", "9.8.1"]
         os: [ubuntu-latest, macOS-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
       if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/master'
 
-    - uses: haskell/actions/setup@v1
+    - uses: haskell-actions/setup@v2
       name: Setup Haskell
       with:
         ghc-version: ${{ matrix.ghc }}
         cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v1
+    - uses: actions/cache@v5
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
