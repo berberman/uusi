@@ -8,7 +8,7 @@
 In distribution packaging, sometimes we need modify the version range of dependencies. Usually, this can be done by some *nix text processing utilities, such as awk, sed, etc.
 However, these tools process cabal files as plain text, not considering the semantics. Thus, it might be pesky or elusive to conver the entire cases.
 `uusi` has almost no extra dependencies, so it's safe to introduce `uusi` as build-depends of the target, which packagers can use to manipulate target's dependencies.
-Currently, `uusi` works in Arch Linux packaging, and you may find out that it has been [required by](https://www.archlinux.org/packages/community/x86_64/uusi/) many haskell packages.
+Currently, `uusi` works in Arch Linux packaging, and you may find out that it has been [required by](https://www.archlinux.org/packages/extra/x86_64/uusi/) many haskell packages.
 In most cases, it is used to loose the version constraint of a dependency when building a package, because the dependent haskell package provided by system may be too new to fit the constraints,
 whereas this package can be built against the newer dependency successfully.
 
