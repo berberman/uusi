@@ -3,6 +3,13 @@
 `uusi` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+## 0.4.4.0
+
+* Support `Cabal` 3.12, 3.14, and 3.16.
+* Support GHC 9.8, 9.10, 9.12, and 9.14.
+* Add `uusi-extract` executable to print package name and version.
+* Update Arch Linux package link from `community` to `extra`.
+
 ## 0.4.3.0
 
 * Use .cabal file in cwd if the target is not set
